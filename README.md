@@ -322,6 +322,10 @@ Bez te tajne datoteka ne radi ništa.
 
 Svaki push na glavnu granu automatski objavljuje novu verziju, a ostale grane dobivaju zasebnu probnu adresu.
 
+**Važno: javna adresa prikazuje granu `main`.** Glavna adresa projekta (npr. `bo-i-niserijal.vercel.app`) uvijek prikazuje ono što je na grani `main`. Ako je kod na nekoj drugoj grani, treba je spojiti u `main` (na GitHubu: **Pull request → Merge**). Dok se to ne napravi, glavna adresa javlja Vercelovu grešku „404: NOT_FOUND”.
+
+Probne adrese ostalih grana zaštićene su Vercelovom prijavom i vidiš ih samo ti. Brendovima zato šalji glavnu adresu, uz `?preview=1`.
+
 **Vlastita domena:** projekt → **Settings → Domains** i slijedi upute. Adresa stranice za sitemap, Open Graph i Google podatke postavlja se automatski iz glavne domene projekta. Ako je ipak želiš zadati ručno, upiši je u `adresa` u `src/config.ts` (npr. `'https://12danadobozica.hr'`).
 
 **Node.js:** projekt traži Node 22.23 ili noviji (zapisano u `package.json`), pa Vercel sam odabire odgovarajuću verziju.
