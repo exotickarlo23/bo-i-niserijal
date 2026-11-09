@@ -1,0 +1,122 @@
+---
+/** Početna stranica: adventski kalendar. */
+import Kalendar from '../components/Kalendar.astro';
+import SponzorZnak from '../components/SponzorZnak.astro';
+import Zvijezda from '../components/Zvijezda.astro';
+import Osnova from '../layouts/Osnova.astro';
+import { stranica } from '../config';
+import { danUMjesecu, formatirajDatum } from '../lib/datumi';
+import { dohvatiEpizode } from '../lib/epizode';
+
+const epizode = await dohvatiEpizode();
+const prva = epizode[0];
+const zadnja = epizode[epizode.length - 1];
+const raspon = `${danUMjesecu(prva.datum)}. – ${formatirajDatum(zadnja.datum)}`;
+
+const site = Astro.site ?? new URL(Astro.url.origin);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: stranica.naziv,
+  description: stranica.opis,
+  url: new URL('/', site).href,
+  inLanguage: 'hr',
+};
+---
+
+<Osnova opis={stranica.opis} jsonLd={jsonLd}>
+  <header class="uvodnik" slot="zaglavlje">
+    <p class="nadnaslov">Božićni serijal · prosinac {stranica.godina}.</p>
+    <h1 class="naslov">
+      <span class="naslov__broj">12</span>{' '}
+      <span class="naslov__tekst">dana do <em>Božića</em></span>
+    </h1>
+    <SponzorZnak velik />
+    <p class="uvodnik__tekst">Svaki drugi dan jedan klasični božićni kolač i priča o njegovoj povijesti.</p>
+    <p class="uvodnik__raspon razdjelnik">
+      <Zvijezda />
+      <span>{raspon}</span>
+      <Zvijezda />
+    </p>
+  </header>
+
+  <div class="kalendar-sekcija">
+    <Kalendar epizode={epizode} />
+  </div>
+
+  <button type="button" id="zatvori-vratasca" slot="pregled">Zatvori vratašca</button>
+</Osnova>
+
+<style>
+  .uvodnik {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    padding: clamp(2.75rem, 10vw, 6rem) var(--rub) clamp(2.5rem, 7vw, 4.5rem);
+    text-align: center;
+  }
+
+  .naslov {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0.2rem 0 0;
+    line-height: 1;
+  }
+
+  .naslov__broj {
+    font-size: clamp(5.5rem, 26vw, 11rem);
+    line-height: 0.82;
+    color: var(--crvena);
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+  }
+
+  .naslov__tekst {
+    font-size: clamp(2.2rem, 9.5vw, 4.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+
+  .naslov__tekst em {
+    color: var(--crvena);
+  }
+
+  .uvodnik__tekst {
+    max-width: 24rem;
+    margin: 0.4rem 0 0;
+    font-weight: 300;
+    font-size: clamp(1.05rem, 3.8vw, 1.2rem);
+    line-height: 1.6;
+  }
+
+  .uvodnik__raspon {
+    margin: 0.6rem 0 0;
+    font-family: var(--font-naslovi);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--tekst);
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+  }
+
+  .uvodnik__raspon span {
+    white-space: nowrap;
+  }
+
+  .uvodnik__raspon::before,
+  .uvodnik__raspon::after {
+    width: min(4.5rem, 12vw);
+  }
+
+  .uvodnik__raspon :global(.zvijezda) {
+    width: 0.6rem;
+    height: 0.6rem;
+    color: var(--zlatna);
+  }
+
+  .kalendar-sekcija {
+    padding: 0 clamp(0.6rem, 3vw, var(--rub));
+  }
+</style>

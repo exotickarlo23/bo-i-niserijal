@@ -1,0 +1,273 @@
+---
+/** Sadržaj stranice najave: tekst o serijalu, video i raspored svih kolača. */
+import Slika from './Slika.astro';
+import SponzorBlok from './SponzorBlok.astro';
+import VideoEpizode from './Video.astro';
+import Zvijezda from './Zvijezda.astro';
+import { formatirajDatum } from '../lib/datumi';
+import type { Epizoda, Uvod } from '../lib/epizode';
+import type { Video } from '../lib/video';
+
+interface Props {
+  uvod: Uvod;
+  epizode: Epizoda[];
+  videi: Video[];
+  imaSliku: boolean;
+}
+
+const { uvod, epizode, videi, imaSliku } = Astro.props;
+const d = uvod.data;
+const kolaci = epizode.filter((e) => e.vrsta === 'recept');
+---
+
+<article class="uvod">
+  {
+    imaSliku && (
+      <div class="uvod__hero">
+        <Slika
+          put={d.slika || '/slike/uvod.jpg'}
+          naziv={d.naziv}
+          alt={d.slikaAlt}
+          sizes="(min-width: 90em) 1400px, 100vw"
+          prioritet
+        />
+      </div>
+    )
+  }
+
+  <header class="uvod__naslovi">
+    <p class="nadnaslov uvod__nadnaslov">
+      <time datetime={d.datum}>{formatirajDatum(d.datum)}</time>
+      <Zvijezda />
+      <span>Najava</span>
+    </p>
+    <h1 class="uvod__naslov">{d.naziv}</h1>
+  </header>
+
+  <div class:list={['uvod__tekst-video', { 'uvod__tekst-video--bez-videa': videi.length === 0 }]}>
+    <div class="uvod__tekst">
+      <slot />
+    </div>
+    <VideoEpizode videi={videi} naziv={d.naziv} />
+  </div>
+
+  <section class="raspored" aria-labelledby="raspored-naslov">
+    <p class="razdjelnik raspored__ukras" aria-hidden="true"><Zvijezda /></p>
+    <h2 class="raspored__naslov" id="raspored-naslov">
+      Raspored <em>kolača</em>
+    </h2>
+    <ol class="raspored__popis">
+      {
+        kolaci.map((e) => (
+          <li class="raspored__stavka" data-datum={e.datum}>
+            <a class="raspored__poveznica" href={e.url}>
+              <span class="raspored__dan" aria-hidden="true">
+                {e.dan}
+              </span>
+              <span class="raspored__opis">
+                <span class="raspored__naziv">{e.naziv}</span>
+                <span class="raspored__datum">{formatirajDatum(e.datum)}</span>
+              </span>
+              <span class="raspored__stanje raspored__stanje--da">Recept →</span>
+              <span class="raspored__stanje raspored__stanje--ne">Uskoro</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <SponzorBlok />
+
+  <div class="uvod__povratak">
+    <a class="gumb" href="/">
+      <Zvijezda />
+      Natrag na kalendar
+    </a>
+  </div>
+</article>
+
+<style>
+  .uvod__hero {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-height: 72svh;
+    overflow: hidden;
+    background: var(--krem-tamna);
+  }
+
+  @media (min-width: 40em) {
+    .uvod__hero {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .uvod__hero {
+      aspect-ratio: 21 / 9;
+    }
+  }
+
+  .uvod__naslovi {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 44rem;
+    margin: clamp(2rem, 6vw, 4.5rem) auto 0;
+    padding: 0 var(--rub);
+    text-align: center;
+  }
+
+  .uvod__nadnaslov {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .uvod__nadnaslov :global(.zvijezda) {
+    width: 0.6rem;
+    height: 0.6rem;
+    color: var(--zlatna);
+  }
+
+  .uvod__naslov {
+    font-size: clamp(2.5rem, 10vw, 4.75rem);
+    line-height: 1.04;
+  }
+
+  .uvod__tekst-video {
+    display: grid;
+    gap: var(--razmak-sekcija);
+    max-width: 64rem;
+    margin: clamp(2.5rem, 7vw, 4.5rem) auto 0;
+    padding: 0 var(--rub);
+  }
+
+  @media (min-width: 60em) {
+    .uvod__tekst-video:not(.uvod__tekst-video--bez-videa) {
+      grid-template-columns: minmax(0, 1fr) 21rem;
+      align-items: start;
+      gap: 4.5rem;
+    }
+  }
+
+  .uvod__tekst {
+    width: 100%;
+    max-width: var(--sirina-teksta);
+    margin-inline: auto;
+  }
+
+  .uvod__tekst :global(p:first-child) {
+    font-family: var(--font-naslovi);
+    font-style: italic;
+    font-size: 1.3rem;
+    line-height: 1.55;
+  }
+
+  /* ─── Raspored ──────────────────────────────────────────────── */
+
+  .raspored {
+    max-width: 40rem;
+    margin: var(--razmak-sekcija) auto 0;
+    padding: 0 var(--rub);
+  }
+
+  .raspored__ukras {
+    margin: 0 0 1.5rem;
+  }
+
+  .raspored__naslov {
+    margin-bottom: 1.75rem;
+    font-size: clamp(1.9rem, 7vw, 2.6rem);
+    text-align: center;
+  }
+
+  .raspored__naslov em {
+    color: var(--crvena);
+  }
+
+  .raspored__popis {
+    padding: 0;
+    list-style: none;
+    border-top: var(--okvir-linija) solid var(--zlatna-55);
+  }
+
+  .raspored__stavka {
+    border-bottom: var(--okvir-linija) solid var(--zlatna-30);
+  }
+
+  .raspored__poveznica {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.9rem 0.25rem;
+    text-decoration: none;
+  }
+
+  .raspored__dan {
+    font-family: var(--font-naslovi);
+    font-size: 2.1rem;
+    line-height: 1;
+    text-align: center;
+    color: var(--crvena);
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+  }
+
+  .raspored__stavka:nth-child(even) .raspored__dan {
+    color: var(--zelena);
+  }
+
+  .raspored__opis {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .raspored__naziv {
+    font-family: var(--font-naslovi);
+    font-size: 1.2rem;
+    line-height: 1.25;
+  }
+
+  .raspored__datum {
+    font-size: 0.8125rem;
+    color: var(--tekst-blagi);
+    font-variant-numeric: lining-nums;
+  }
+
+  .raspored__stanje {
+    display: none;
+    font-weight: 700;
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .raspored__stavka.objavljeno .raspored__stanje--da {
+    display: inline;
+    color: var(--crvena);
+  }
+
+  .raspored__stavka.uskoro .raspored__stanje--ne {
+    display: inline;
+    color: var(--tekst-blagi);
+  }
+
+  .raspored__stavka.uskoro .raspored__naziv {
+    color: var(--tekst-blagi);
+  }
+
+  .raspored__poveznica:hover .raspored__naziv {
+    color: var(--crvena);
+  }
+
+  .uvod__povratak {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--razmak-sekcija);
+  }
+</style>

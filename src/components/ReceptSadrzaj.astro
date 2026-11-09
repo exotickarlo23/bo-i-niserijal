@@ -1,0 +1,539 @@
+---
+/**
+ * Sadržaj stranice recepta (mini blog):
+ * fotografija, naslov i datum → priča → video → osnovni podaci →
+ * sastojci → postupak → savjet → sponzor → navigacija.
+ * Priča (tekst iz Markdowna) dolazi kroz <slot />.
+ */
+import Navigacija from './Navigacija.astro';
+import Slika from './Slika.astro';
+import SponzorBlok from './SponzorBlok.astro';
+import Tekst from './Tekst.astro';
+import VideoEpizode from './Video.astro';
+import Zvijezda from './Zvijezda.astro';
+import { sponsor } from '../config';
+import { formatirajDatum } from '../lib/datumi';
+import type { Epizoda, Recept } from '../lib/epizode';
+import { grupeSastojaka } from '../lib/recept';
+import { jePopunjeno, prikazVremena } from '../lib/tekst';
+import type { Video } from '../lib/video';
+
+interface Props {
+  recept: Recept;
+  redniBroj: number;
+  ukupno: number;
+  videi: Video[];
+  prethodni?: Epizoda;
+  sljedeci?: Epizoda;
+}
+
+const { recept, redniBroj, ukupno, videi, prethodni, sljedeci } = Astro.props;
+const d = recept.data;
+
+const grupe = grupeSastojaka(d.sastojci);
+const kolicina = d.kolicina === null || d.kolicina === undefined ? '' : String(d.kolicina).trim();
+
+const podaci = [
+  { oznaka: 'Priprema', vrijednost: prikazVremena(d.vrijemePripreme) },
+  { oznaka: d.oznakaPecenja || 'Pečenje', vrijednost: prikazVremena(d.vrijemePecenja) },
+  { oznaka: 'Količina', vrijednost: kolicina },
+].filter((p) => p.vrijednost !== '');
+
+// Proizvod sponzora prikazuje se samo kad je sponzor uključen u src/config.ts.
+const proizvod =
+  sponsor && d.sponsorProduct
+    ? typeof d.sponsorProduct === 'string'
+      ? { naziv: d.sponsorProduct.trim(), url: '' }
+      : d.sponsorProduct
+    : null;
+const prikaziProizvod = proizvod !== null && jePopunjeno(proizvod.naziv);
+
+// Ukrasni inicijal priče tek kad je upisan pravi tekst (ne placeholder "[PRIČA ...]").
+const pricaUpisana = !(recept.body ?? '').trim().startsWith('[');
+---
+
+<article class="recept">
+  <header class="recept__vrh">
+    <div class="recept__hero">
+      <Slika
+        put={d.slika || `/slike/${d.slug}.jpg`}
+        naziv={d.naziv}
+        alt={d.slikaAlt}
+        sizes="(min-width: 90em) 1400px, 100vw"
+        prioritet
+      />
+    </div>
+    <div class="recept__naslovi">
+      <p class="nadnaslov recept__nadnaslov">
+        <time datetime={d.datum}>{formatirajDatum(d.datum)}</time>
+        <Zvijezda />
+        <span>Kolač {redniBroj} od {ukupno}</span>
+      </p>
+      <h1 class="recept__naslov">{d.naziv}</h1>
+      {jePopunjeno(d.opis) && <p class="recept__uvod">{d.opis}</p>}
+    </div>
+  </header>
+
+  <div class:list={['recept__prica-video', { 'recept__prica-video--bez-videa': videi.length === 0 }]}>
+    <section class="recept__prica" aria-labelledby="prica-naslov">
+      <h2 class="nadnaslov recept__oznaka" id="prica-naslov">Priča</h2>
+      <div class:list={['prica', { 'prica--inicijal': pricaUpisana }]}>
+        <slot />
+      </div>
+    </section>
+    <VideoEpizode videi={videi} naziv={d.naziv} />
+  </div>
+
+  {
+    podaci.length > 0 && (
+      <dl class="podaci">
+        {podaci.map((p) => (
+          <div class="podaci__stavka">
+            <dt>{p.oznaka}</dt>
+            <dd>
+              <Tekst v={p.vrijednost} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+
+  <div class="recept__kuhinja">
+    <section class="sastojci" aria-labelledby="sastojci-naslov">
+      <h2 class="recept__h2" id="sastojci-naslov">Sastojci</h2>
+      {
+        grupe.map((g) => (
+          <div class="sastojci__grupa">
+            {g.grupa && (
+              <h3 class="sastojci__grupa-naslov">
+                <Tekst v={g.grupa} />
+              </h3>
+            )}
+            <ul class="sastojci__popis">
+              {g.stavke.map((s) => (
+                <li>
+                  {s.kolicina && (
+                    <span class="sastojci__kolicina">
+                      <Tekst v={s.kolicina} />
+                    </span>
+                  )}{' '}
+                  <Tekst v={s.sastojak} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      {
+        prikaziProizvod && proizvod && sponsor && (
+          <p class="sastojci__sponzor">
+            <Zvijezda />
+            <span>
+              U ovom receptu:{' '}
+              {proizvod.url ? (
+                <a href={proizvod.url} rel="sponsored noopener" target="_blank">
+                  {proizvod.naziv}
+                </a>
+              ) : (
+                proizvod.naziv
+              )}
+              <span class="sastojci__brend"> · {sponsor.name}</span>
+            </span>
+          </p>
+        )
+      }
+    </section>
+
+    <section class="postupak" aria-labelledby="postupak-naslov">
+      <h2 class="recept__h2" id="postupak-naslov">Postupak</h2>
+      <ol class="postupak__koraci">
+        {
+          d.koraci.map((k) => (
+            <li>
+              <Tekst v={k} />
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+
+  {
+    d.savjet && (
+      <aside class="savjet" aria-labelledby="savjet-naslov">
+        <Zvijezda class="savjet__zvijezda" />
+        <h2 class="savjet__naslov" id="savjet-naslov">
+          Savjet <em>za kraj</em>
+        </h2>
+        <p class="savjet__tekst">
+          <Tekst v={d.savjet} />
+        </p>
+      </aside>
+    )
+  }
+
+  <SponzorBlok />
+  <Navigacija prethodni={prethodni} sljedeci={sljedeci} />
+</article>
+
+<style>
+  /* ─── Vrh: fotografija, naslov, datum ───────────────────────── */
+
+  .recept__hero {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-height: 72svh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--krem-tamna);
+  }
+
+  @media (min-width: 40em) {
+    .recept__hero {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .recept__hero {
+      aspect-ratio: 21 / 9;
+    }
+  }
+
+  .recept__hero :global(.slika-placeholder__naziv) {
+    font-size: clamp(1.1rem, 7cqmin, 2.4rem);
+  }
+
+  .recept__naslovi {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 44rem;
+    margin: clamp(2.25rem, 7vw, 4.5rem) auto 0;
+    padding: 0 var(--rub);
+    text-align: center;
+  }
+
+  .recept__nadnaslov {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .recept__nadnaslov :global(.zvijezda) {
+    width: 0.6rem;
+    height: 0.6rem;
+    color: var(--zlatna);
+  }
+
+  .recept__naslov {
+    font-size: clamp(2.6rem, 11vw, 5.25rem);
+    line-height: 1.02;
+  }
+
+  .recept__uvod {
+    max-width: 32rem;
+    margin: 0.25rem 0 0;
+    font-family: var(--font-naslovi);
+    font-style: italic;
+    font-size: clamp(1.1rem, 3.6vw, 1.3rem);
+    line-height: 1.5;
+    color: var(--tekst-blagi);
+  }
+
+  /* ─── Priča i video ─────────────────────────────────────────── */
+
+  .recept__prica-video {
+    display: grid;
+    gap: var(--razmak-sekcija);
+    max-width: 64rem;
+    margin: var(--razmak-sekcija) auto 0;
+    padding: 0 var(--rub);
+  }
+
+  @media (min-width: 60em) {
+    .recept__prica-video:not(.recept__prica-video--bez-videa) {
+      grid-template-columns: minmax(0, 1fr) 21rem;
+      align-items: start;
+      gap: 4.5rem;
+    }
+  }
+
+  .recept__prica {
+    width: 100%;
+    max-width: var(--sirina-teksta);
+    margin-inline: auto;
+  }
+
+  .recept__oznaka {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .recept__oznaka::after {
+    content: '';
+    flex: 1;
+    height: var(--okvir-linija);
+    background: var(--zlatna-55);
+  }
+
+  .prica {
+    font-size: 1.0625rem;
+    font-weight: 400;
+  }
+
+  .prica :global(p) {
+    margin: 0 0 1.15em;
+  }
+
+  .prica--inicijal :global(p:first-child::first-letter) {
+    float: left;
+    margin: 0.06em 0.12em 0 0;
+    font-family: var(--font-naslovi);
+    font-size: 3.5em;
+    line-height: 0.8;
+    color: var(--crvena);
+  }
+
+  .prica :global(a) {
+    color: var(--crvena);
+  }
+
+  .prica :global(blockquote) {
+    margin: 1.75em 0;
+    padding: 0 0 0 1.25em;
+    border-left: var(--okvir-linija) solid var(--zlatna);
+    font-family: var(--font-naslovi);
+    font-style: italic;
+    font-size: 1.2em;
+    line-height: 1.5;
+  }
+
+  .prica :global(h2),
+  .prica :global(h3) {
+    margin: 1.6em 0 0.6em;
+    font-size: 1.45rem;
+  }
+
+  /* ─── Osnovni podaci ────────────────────────────────────────── */
+
+  .podaci {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    max-width: 40rem;
+    margin: var(--razmak-sekcija) auto 0;
+    padding: 1.25rem 0;
+    border-block: var(--okvir-linija) solid var(--zlatna-55);
+    text-align: center;
+  }
+
+  .podaci__stavka {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .podaci__stavka + .podaci__stavka {
+    border-left: var(--okvir-linija) solid var(--zlatna-55);
+  }
+
+  .podaci dt {
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+    font-size: 0.625rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--crvena);
+  }
+
+  .podaci dd {
+    margin: 0;
+    font-family: var(--font-naslovi);
+    font-size: clamp(1.05rem, 4vw, 1.45rem);
+    line-height: 1.25;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+    overflow-wrap: anywhere;
+  }
+
+  .podaci {
+    margin-inline: max(var(--rub), calc((100% - 40rem) / 2));
+  }
+
+  /* ─── Sastojci i postupak ───────────────────────────────────── */
+
+  .recept__kuhinja {
+    display: grid;
+    gap: var(--razmak-sekcija);
+    max-width: 64rem;
+    margin: var(--razmak-sekcija) auto 0;
+    padding: 0 var(--rub);
+  }
+
+  @media (min-width: 52em) {
+    .recept__kuhinja {
+      grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+      gap: 4.5rem;
+      align-items: start;
+    }
+
+    .sastojci {
+      position: sticky;
+      top: calc(var(--okvir-razmak) + 2rem);
+    }
+  }
+
+  .recept__h2 {
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.75rem, 6vw, 2.25rem);
+  }
+
+  .sastojci {
+    padding: 1.75rem 1.5rem 1.5rem;
+    background: var(--krem-svijetla);
+    box-shadow: inset 0 0 0 var(--okvir-linija) var(--zlatna-55);
+  }
+
+  .sastojci .recept__h2 {
+    margin-bottom: 1.1rem;
+  }
+
+  .sastojci__grupa + .sastojci__grupa {
+    margin-top: 1.5rem;
+  }
+
+  .sastojci__grupa-naslov {
+    margin-bottom: 0.5rem;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--crvena);
+  }
+
+  .sastojci__popis {
+    padding: 0;
+    list-style: none;
+  }
+
+  .sastojci__popis li {
+    padding: 0.5rem 0;
+    line-height: 1.45;
+    border-bottom: var(--okvir-linija) solid var(--zlatna-30);
+  }
+
+  .sastojci__popis li:last-child {
+    border-bottom: 0;
+  }
+
+  .sastojci__kolicina {
+    font-weight: 700;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .sastojci__sponzor {
+    display: flex;
+    gap: 0.55rem;
+    align-items: baseline;
+    margin: 1.25rem 0 0;
+    padding-top: 1rem;
+    border-top: var(--okvir-linija) solid var(--zlatna-55);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--tekst-blagi);
+  }
+
+  .sastojci__sponzor :global(.zvijezda) {
+    flex: none;
+    width: 0.6rem;
+    height: 0.6rem;
+    color: var(--zlatna);
+    transform: translateY(0.05em);
+  }
+
+  .sastojci__sponzor a {
+    color: var(--tekst);
+  }
+
+  .postupak__koraci {
+    padding: 0;
+    list-style: none;
+    counter-reset: korak;
+  }
+
+  .postupak__koraci li {
+    position: relative;
+    counter-increment: korak;
+    padding: 0 0 1.6rem 3.4rem;
+    min-height: 2.5rem;
+  }
+
+  .postupak__koraci li::before {
+    content: counter(korak);
+    position: absolute;
+    left: 0;
+    top: -0.2rem;
+    width: 2.4rem;
+    font-family: var(--font-naslovi);
+    font-size: 2rem;
+    line-height: 1;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+    color: var(--crvena);
+    text-align: center;
+  }
+
+  .postupak__koraci li::after {
+    content: '';
+    position: absolute;
+    left: 1.2rem;
+    top: 2.2rem;
+    bottom: 0.6rem;
+    width: var(--okvir-linija);
+    background: var(--zlatna-30);
+  }
+
+  .postupak__koraci li:last-child::after {
+    display: none;
+  }
+
+  /* ─── Savjet ────────────────────────────────────────────────── */
+
+  .savjet {
+    position: relative;
+    max-width: 36rem;
+    margin: var(--razmak-sekcija) auto 0;
+    margin-inline: max(var(--rub), calc((100% - 36rem) / 2));
+    padding: 2.25rem clamp(1.25rem, 5vw, 2.5rem) 2rem;
+    border: var(--okvir-linija) solid var(--zlatna-55);
+    text-align: center;
+  }
+
+  .savjet :global(.savjet__zvijezda) {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1.3rem;
+    height: 1.3rem;
+    padding: 0 0.4rem;
+    box-sizing: content-box;
+    background: var(--krem);
+    color: var(--zlatna);
+    transform: translate(-50%, -50%);
+  }
+
+  .savjet__naslov {
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+  }
+
+  .savjet__naslov em {
+    color: var(--crvena);
+  }
+
+  .savjet__tekst {
+    margin: 0;
+    font-size: 1rem;
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+/**
+ * Ljubazna stranica za recept (ili najavu) koji još nije objavljen.
+ * Skriva se čim se sadržaj otključa (klasa .otkljucano na <html>).
+ */
+import Zvijezda from './Zvijezda.astro';
+import { formatirajDatum } from '../lib/datumi';
+
+interface Props {
+  datum: string;
+  /** Npr. "Ovaj kolač stiže" ili "Serijal počinje". */
+  naslov: string;
+}
+
+const { datum, naslov } = Astro.props;
+---
+
+<section class="zakljucano-stranica" aria-labelledby="zakljucano-naslov">
+  <div class="zakljucano__vratasca" aria-hidden="true">
+    <span class="zakljucano__broj">{Number(datum.slice(8, 10))}</span>
+    <Zvijezda class="zakljucano__zvijezda" />
+  </div>
+  <h1 class="zakljucano__naslov" id="zakljucano-naslov">
+    {naslov}{' '}
+    <span class="zakljucano__datum">{formatirajDatum(datum)}</span>
+  </h1>
+  <p class="zakljucano__tekst">Vratašca se otvaraju u ponoć. Do tada je ovdje sve još zatvoreno.</p>
+  <a class="gumb" href="/">
+    <Zvijezda />
+    Natrag na kalendar
+  </a>
+</section>
+
+<style>
+  .zakljucano-stranica {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 30rem;
+    margin: clamp(2rem, 8vh, 5rem) auto 0;
+    padding: 0 var(--rub);
+    text-align: center;
+  }
+
+  :global(.otkljucano) .zakljucano-stranica {
+    display: none;
+  }
+
+  .zakljucano__vratasca {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 7.5rem;
+    aspect-ratio: 4 / 5;
+    background: var(--crvena);
+    color: var(--krem);
+  }
+
+  .zakljucano__vratasca::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: var(--okvir-linija) solid var(--zlatna-55);
+  }
+
+  .zakljucano__broj {
+    font-family: var(--font-naslovi);
+    font-size: 3.4rem;
+    line-height: 0.9;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+  }
+
+  .zakljucano__vratasca :global(.zakljucano__zvijezda) {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--zlatna);
+  }
+
+  .zakljucano__naslov {
+    font-size: clamp(1.6rem, 6vw, 2.25rem);
+  }
+
+  .zakljucano__datum {
+    display: block;
+    margin-top: 0.2em;
+    font-style: italic;
+    font-size: 1.35em;
+    color: var(--crvena);
+  }
+
+  .zakljucano__tekst {
+    margin: 0;
+    color: var(--tekst-blagi);
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+/** "× [logo]" uz naziv serijala. Ne prikazuje ništa kad sponzor nije postavljen. */
+import { sponsor } from '../config';
+
+interface Props {
+  velik?: boolean;
+}
+
+const { velik = false } = Astro.props;
+---
+
+{
+  sponsor && (
+    <a
+      class:list={['sponzor-znak', { 'sponzor-znak--velik': velik }]}
+      href={sponsor.url}
+      rel="sponsored noopener"
+      target="_blank"
+    >
+      <span class="sponzor-znak__x" aria-hidden="true">
+        ×
+      </span>
+      <img class="sponzor-znak__logo" src={sponsor.logo} alt={sponsor.name} />
+    </a>
+  )
+}
+
+<style>
+  .sponzor-znak {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--zlatna);
+  }
+
+  .sponzor-znak__x {
+    font-family: var(--font-naslovi);
+    font-size: 1.15em;
+    line-height: 1;
+    color: var(--zlatna);
+  }
+
+  .sponzor-znak__logo {
+    height: 1.35rem;
+    width: auto;
+    max-width: 7rem;
+    object-fit: contain;
+  }
+
+  .sponzor-znak--velik {
+    gap: 0.9rem;
+    font-size: 1.5rem;
+  }
+
+  .sponzor-znak--velik .sponzor-znak__logo {
+    height: clamp(1.75rem, 5vw, 2.5rem);
+    max-width: 11rem;
+  }
+</style>

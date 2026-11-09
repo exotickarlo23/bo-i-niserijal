@@ -1,0 +1,167 @@
+---
+/**
+ * Osnovni predložak svake stranice: <head> sa SEO podacima, zlatni okvir,
+ * podnožje i mala skripta za datume i način pregleda (?preview=1).
+ */
+import '../styles/global.css';
+import Podnozje from '../components/Podnozje.astro';
+import { stranica } from '../config';
+
+export interface SlikaOg {
+  src: string;
+  sirina: number;
+  visina: number;
+  alt?: string;
+}
+
+interface Props {
+  /** Naslov stranice (bez naziva serijala; dodaje se automatski). Za početnu ostavi prazno. */
+  naslov?: string;
+  opis: string;
+  slikaOg?: SlikaOg | null;
+  tip?: 'website' | 'article';
+  /** schema.org podaci (JSON-LD) koji se upisuju u <head>. */
+  jsonLd?: Record<string, unknown> | null;
+  /** Datum objave (GGGG-MM-DD) za article:published_time. */
+  objavljeno?: string;
+  /** Stranica koju tražilice ne trebaju indeksirati (npr. 404). */
+  bezIndeksa?: boolean;
+}
+
+const { naslov, opis, slikaOg, tip = 'website', jsonLd, objavljeno, bezIndeksa = false } = Astro.props;
+
+const site = Astro.site ?? new URL(Astro.url.origin);
+const punNaslov = naslov ? `${naslov} · ${stranica.naziv}` : `${stranica.naziv} · Adventski kalendar božićnih kolača`;
+const kanonski = new URL(Astro.url.pathname, site).href;
+
+const og: SlikaOg = slikaOg ?? {
+  src: '/og.jpg',
+  sirina: 1200,
+  visina: 630,
+  alt: `${stranica.naziv}: adventski kalendar božićnih kolača`,
+};
+const ogSlika = new URL(og.src, site).href;
+
+/** JSON u <script> bez mogućnosti zatvaranja oznake. */
+const jsonUSkripti = (podaci: unknown) => JSON.stringify(podaci).replace(/</g, '\\u003c');
+---
+
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{punNaslov}</title>
+    <meta name="description" content={opis} />
+    <link rel="canonical" href={kanonski} />
+    {bezIndeksa && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#F7F0E4" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Open Graph i Twitter/X -->
+    <meta property="og:type" content={tip} />
+    <meta property="og:site_name" content={stranica.naziv} />
+    <meta property="og:locale" content="hr_HR" />
+    <meta property="og:title" content={naslov ?? stranica.naziv} />
+    <meta property="og:description" content={opis} />
+    <meta property="og:url" content={kanonski} />
+    <meta property="og:image" content={ogSlika} />
+    <meta property="og:image:width" content={String(og.sirina)} />
+    <meta property="og:image:height" content={String(og.visina)} />
+    {og.alt && <meta property="og:image:alt" content={og.alt} />}
+    {objavljeno && <meta property="article:published_time" content={`${objavljeno}T00:00:00+01:00`} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={naslov ?? stranica.naziv} />
+    <meta name="twitter:description" content={opis} />
+    <meta name="twitter:image" content={ogSlika} />
+    {og.alt && <meta name="twitter:image:alt" content={og.alt} />}
+
+    <!-- Fontovi: Playfair Display (regular, italic) i Lato (300, 400, 700) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap"
+    />
+
+    {jsonLd && <script is:inline type="application/ld+json" set:html={jsonUSkripti(jsonLd)} />}
+
+    <!--
+      Datumi i način pregleda. Mora se izvršiti prije prikaza stranice.
+      Vratašca i recepti otključavaju se u ponoć po zagrebačkom vremenu;
+      ?preview=1 u adresi otključava sve.
+    -->
+    <script is:inline>
+      (function () {
+        var pregled = false;
+        try {
+          pregled = new URLSearchParams(location.search).get('preview') === '1';
+        } catch (e) {}
+
+        function danas() {
+          try {
+            var d = {};
+            new Intl.DateTimeFormat('en-GB', {
+              timeZone: 'Europe/Zagreb',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+            })
+              .formatToParts(new Date())
+              .forEach(function (p) {
+                d[p.type] = p.value;
+              });
+            return d.year + '-' + d.month + '-' + d.day;
+          } catch (e) {
+            return new Date(Date.now() + 36e5).toISOString().slice(0, 10);
+          }
+        }
+
+        window.dvanaest = {
+          pregled: pregled,
+          danas: danas,
+          otkljucano: function (datum) {
+            return pregled || datum <= danas();
+          },
+        };
+
+        var html = document.documentElement;
+        html.classList.add('js');
+        if (!pregled) return;
+        html.classList.add('pregled');
+
+        // U načinu pregleda sve unutarnje poveznice zadržavaju ?preview=1.
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('a[href^="/"]:not([data-bez-pregleda])').forEach(function (a) {
+            var u = new URL(a.getAttribute('href'), location.origin);
+            u.searchParams.set('preview', '1');
+            a.setAttribute('href', u.pathname + u.search + u.hash);
+          });
+        });
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="preskoci" href="#sadrzaj">Preskoči na sadržaj</a>
+    <div class="okvir" aria-hidden="true"></div>
+
+    <div class="stranica">
+      <!-- Vidljivo samo uz ?preview=1 -->
+      <div class="pregled-oznaka">
+        <span>Pregled: sve je otključano</span>
+        <slot name="pregled" />
+        <a href={Astro.url.pathname} data-bez-pregleda>Izađi iz pregleda</a>
+      </div>
+      <slot name="zaglavlje" />
+      <main id="sadrzaj">
+        <slot />
+      </main>
+      <Podnozje />
+    </div>
+  </body>
+</html>

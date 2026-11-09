@@ -1,0 +1,41 @@
+---
+/** Zaglavlje unutarnjih stranica: "12 dana do Božića" (× logo sponzora). */
+import SponzorZnak from './SponzorZnak.astro';
+import { stranica } from '../config';
+---
+
+<header class="zaglavlje">
+  <a class="zaglavlje__naziv" href="/" aria-label={`${stranica.naziv}: natrag na kalendar`}>
+    12 dana do <em>Božića</em>
+  </a>
+  <SponzorZnak />
+</header>
+
+<style>
+  .zaglavlje {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 0.75rem;
+    padding: clamp(1.1rem, 3.5vw, 1.75rem) var(--rub);
+  }
+
+  .zaglavlje__naziv {
+    font-family: var(--font-naslovi);
+    font-size: clamp(1.15rem, 3.6vw, 1.4rem);
+    line-height: 1.2;
+    font-variant-numeric: lining-nums;
+    font-feature-settings: 'lnum' 1;
+    text-decoration: none;
+    color: var(--tekst);
+  }
+
+  .zaglavlje__naziv em {
+    color: var(--crvena);
+  }
+
+  .zaglavlje__naziv:hover {
+    color: var(--crvena);
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+/** Prethodni / sljedeći kolač i povratak na kalendar. */
+import Zvijezda from './Zvijezda.astro';
+import { formatirajDatum } from '../lib/datumi';
+import type { Epizoda } from '../lib/epizode';
+
+interface Props {
+  prethodni?: Epizoda;
+  sljedeci?: Epizoda;
+}
+
+const { prethodni, sljedeci } = Astro.props;
+---
+
+<nav class="navigacija" aria-label="Ostale epizode">
+  <div class="navigacija__par">
+    {
+      prethodni ? (
+        <a class="navigacija__poveznica navigacija__poveznica--prethodni" href={prethodni.url} rel="prev">
+          <span class="navigacija__smjer">← Prethodni</span>
+          <span class="navigacija__naziv">{prethodni.naziv}</span>
+          <span class="navigacija__datum">{formatirajDatum(prethodni.datum)}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      sljedeci ? (
+        <a class="navigacija__poveznica navigacija__poveznica--sljedeci" href={sljedeci.url} rel="next">
+          <span class="navigacija__smjer">Sljedeći →</span>
+          <span class="navigacija__naziv">{sljedeci.naziv}</span>
+          <span class="navigacija__datum">{formatirajDatum(sljedeci.datum)}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+  </div>
+  <a class="gumb navigacija__kalendar" href="/">
+    <Zvijezda />
+    Natrag na kalendar
+  </a>
+</nav>
+
+<style>
+  .navigacija {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    max-width: 52rem;
+    margin: var(--razmak-sekcija) auto 0;
+    padding: 0 var(--rub);
+  }
+
+  .navigacija__par {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    border-block: var(--okvir-linija) solid var(--zlatna-55);
+  }
+
+  .navigacija__poveznica {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1.4rem 0.25rem;
+    text-decoration: none;
+  }
+
+  .navigacija__poveznica--prethodni {
+    padding-right: 1rem;
+  }
+
+  .navigacija__poveznica--sljedeci {
+    grid-column: 2;
+    align-items: flex-end;
+    padding-left: 1rem;
+    text-align: right;
+    border-left: var(--okvir-linija) solid var(--zlatna-55);
+  }
+
+  .navigacija__smjer {
+    font-weight: 700;
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--crvena);
+  }
+
+  .navigacija__naziv {
+    font-family: var(--font-naslovi);
+    font-size: clamp(1.05rem, 3.6vw, 1.5rem);
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .navigacija__poveznica:hover .navigacija__naziv {
+    color: var(--crvena);
+  }
+
+  .navigacija__datum {
+    font-size: 0.8125rem;
+    color: var(--tekst-blagi);
+    font-variant-numeric: lining-nums;
+  }
+</style>

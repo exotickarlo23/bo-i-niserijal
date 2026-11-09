@@ -1,0 +1,18 @@
+# build
+dist/
+.astro/
+.vercel/
+
+# ovisnosti
+node_modules/
+
+# logovi
+npm-debug.log*
+
+# okruženje
+.env
+.env.*
+
+# sustav
+.DS_Store
+Thumbs.db

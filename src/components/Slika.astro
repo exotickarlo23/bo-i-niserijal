@@ -1,0 +1,50 @@
+---
+/**
+ * Fotografija kolača iz public/slike/ ili, dok je nema, elegantan placeholder s nazivom.
+ */
+import Zvijezda from './Zvijezda.astro';
+import { pronadiSliku, responzivna } from '../lib/slike';
+
+interface Props {
+  /** Put iz frontmattera, npr. "/slike/medenjaci.jpg". */
+  put: string;
+  /** Naziv kolača (za placeholder i zadani alt tekst). */
+  naziv: string;
+  alt?: string;
+  /** Atribut sizes, npr. "100vw". */
+  sizes: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  /** Glavna slika stranice: učitava se prva. */
+  prioritet?: boolean;
+}
+
+const { put, naziv, alt, sizes, class: klasa, loading = 'lazy', prioritet = false } = Astro.props;
+
+const slika = pronadiSliku(put);
+const r = slika ? await responzivna(slika) : null;
+---
+
+{
+  r ? (
+    <img
+      class:list={['slika', klasa]}
+      src={r.src}
+      srcset={r.srcset}
+      sizes={sizes}
+      width={r.sirina}
+      height={r.visina}
+      alt={alt || naziv}
+      loading={prioritet ? 'eager' : loading}
+      decoding="async"
+      fetchpriority={prioritet ? 'high' : undefined}
+    />
+  ) : (
+    <div class:list={['slika-placeholder', klasa]} role="img" aria-label={`${naziv}: fotografija stiže uskoro`}>
+      <span class="slika-placeholder__sadrzaj" aria-hidden="true">
+        <Zvijezda class="slika-placeholder__zvijezda" />
+        <span class="slika-placeholder__naziv">{naziv}</span>
+      </span>
+    </div>
+  )
+}

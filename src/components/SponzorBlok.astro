@@ -1,0 +1,58 @@
+---
+/** "Serijal u suradnji s [brend]" na dnu recepta. Bez sponzora ne prikazuje ništa. */
+import Zvijezda from './Zvijezda.astro';
+import { sponsor } from '../config';
+---
+
+{
+  sponsor && (
+    <aside class="sponzor-blok" aria-label="Sponzor serijala">
+      <Zvijezda class="sponzor-blok__zvijezda" />
+      <p class="sponzor-blok__tekst">Serijal u suradnji s</p>
+      <a class="sponzor-blok__poveznica" href={sponsor.url} rel="sponsored noopener" target="_blank">
+        <img class="sponzor-blok__logo" src={sponsor.logo} alt={sponsor.name} />
+      </a>
+    </aside>
+  )
+}
+
+<style>
+  .sponzor-blok {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 22rem;
+    margin: var(--razmak-sekcija) auto 0;
+    padding: 1.75rem 1.5rem;
+    border-block: var(--okvir-linija) solid var(--zlatna-55);
+    text-align: center;
+  }
+
+  .sponzor-blok :global(.sponzor-blok__zvijezda) {
+    width: 0.7rem;
+    height: 0.7rem;
+    color: var(--zlatna);
+  }
+
+  .sponzor-blok__tekst {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--tekst-blagi);
+  }
+
+  .sponzor-blok__poveznica {
+    display: block;
+    padding: 0.25rem;
+  }
+
+  .sponzor-blok__logo {
+    height: 2.25rem;
+    width: auto;
+    max-width: 12rem;
+    object-fit: contain;
+  }
+</style>

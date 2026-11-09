@@ -1,0 +1,13 @@
+---
+/** Ispisuje tekst iz frontmattera; placeholder u [ZAGRADAMA] dobiva diskretan stil. */
+import { jePlaceholder } from '../lib/tekst';
+
+interface Props {
+  v: string | number | null | undefined;
+}
+
+const { v } = Astro.props;
+const tekst = v === null || v === undefined ? '' : String(v);
+---
+
+{jePlaceholder(tekst) ? <span class="ph">{tekst}</span> : tekst}

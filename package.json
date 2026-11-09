@@ -1,0 +1,20 @@
+{
+  "name": "12-dana-do-bozica",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.8"
+  },
+  "description": "12 dana do Božića: adventski kalendar božićnih kolača (Astro, statična stranica za Vercel)",
+  "engines": {
+    "node": ">=22.23.4"
+  }
+}

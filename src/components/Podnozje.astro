@@ -1,0 +1,93 @@
+---
+import Zvijezda from './Zvijezda.astro';
+import { stranica } from '../config';
+
+const mreze = [
+  { naziv: 'TikTok', url: stranica.drustveneMreze.tiktok },
+  { naziv: 'Instagram', url: stranica.drustveneMreze.instagram },
+  { naziv: 'YouTube', url: stranica.drustveneMreze.youtube },
+].filter((m) => m.url && m.url.trim() !== '');
+---
+
+<footer class="podnozje">
+  <Zvijezda class="podnozje__zvijezda" />
+  <p class="podnozje__naziv">
+    <a href="/">{stranica.naziv}</a>
+  </p>
+  <p class="podnozje__opis">
+    Božićni serijal · prosinac {stranica.godina}.{stranica.autor && <> · {stranica.autor}</>}
+  </p>
+  {
+    mreze.length > 0 && (
+      <ul class="podnozje__mreze" aria-label="Društvene mreže">
+        {mreze.map((m) => (
+          <li>
+            <a href={m.url} rel="me noopener" target="_blank">
+              {m.naziv}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</footer>
+
+<style>
+  .podnozje {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: var(--razmak-sekcija);
+    padding: 2.5rem var(--rub) 3rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--tekst-blagi);
+  }
+
+  .podnozje :global(.podnozje__zvijezda) {
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-bottom: 0.6rem;
+    color: var(--zlatna);
+  }
+
+  .podnozje__naziv {
+    margin: 0;
+    font-family: var(--font-naslovi);
+    font-size: 1.125rem;
+    color: var(--tekst);
+  }
+
+  .podnozje__naziv a {
+    text-decoration: none;
+  }
+
+  .podnozje__opis {
+    margin: 0;
+    font-variant-numeric: lining-nums;
+  }
+
+  .podnozje__mreze {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 1.25rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 700;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .podnozje__mreze a {
+    text-decoration: none;
+    color: var(--crvena);
+  }
+
+  .podnozje__mreze a:hover {
+    text-decoration: underline;
+  }
+</style>

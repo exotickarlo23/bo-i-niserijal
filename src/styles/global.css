@@ -1,0 +1,407 @@
+/* ════════════════════════════════════════════════════════════════
+   12 dana do Božića · zajednički stilovi
+   Boje, fontovi i zlatni okvir prema pitch PDF-u.
+   ════════════════════════════════════════════════════════════════ */
+
+/*
+  Lato s Google Fontsa nema slova č, đ, Č i Đ. Ova mala dopuna (oko 3 KB po
+  debljini) iz službenog Lata 2.015 popunjava samo ta četiri znaka; sve ostalo
+  i dalje dolazi s Google Fontsa. Licenca: public/fonts/OFL.txt.
+*/
+@font-face {
+  font-family: 'Dvanaest Dopuna';
+  src: url('/fonts/dvanaest-dopuna-300.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+010C-010D, U+0110-0111;
+}
+
+@font-face {
+  font-family: 'Dvanaest Dopuna';
+  src: url('/fonts/dvanaest-dopuna-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+010C-010D, U+0110-0111;
+}
+
+@font-face {
+  font-family: 'Dvanaest Dopuna';
+  src: url('/fonts/dvanaest-dopuna-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+010C-010D, U+0110-0111;
+}
+
+:root {
+  /* Paleta */
+  --crvena: #7a1e24;
+  --zelena: #1f3d2e;
+  --zlatna: #b8924a;
+  --krem: #f7f0e4;
+  --tekst: #2b2320;
+
+  /* Izvedenice iste palete */
+  --zlatna-55: rgb(184 146 74 / 0.55);
+  --zlatna-30: rgb(184 146 74 / 0.3);
+  --krem-tamna: #efe5d3;
+  --krem-svijetla: #fbf7ef;
+  --tekst-blagi: #6b5d55;
+
+  /* Fontovi */
+  --font-naslovi: 'Playfair Display', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-tekst: 'Lato', 'Dvanaest Dopuna', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Zlatni okvir: ~0.4 mm, 55 % prozirnosti, uvučen od ruba */
+  --okvir-razmak: 10px;
+  --okvir-linija: 0.4mm;
+
+  /* Mjere */
+  --rub: 1.25rem;
+  --sirina-teksta: 35rem;
+  --sirina-stranice: 74rem;
+  --razmak-sekcija: clamp(3.5rem, 10vw, 7.5rem);
+}
+
+@media (min-width: 40em) {
+  :root {
+    --okvir-razmak: 16px;
+    --rub: 2.5rem;
+  }
+}
+
+@media (min-width: 64em) {
+  :root {
+    --okvir-razmak: 22px;
+    --rub: 4rem;
+  }
+}
+
+/* ─── Osnova ─────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--krem);
+  color: var(--tekst);
+  /* Brojke svugdje poravnate (lining), i u Playfair Displayu koji inače ima "stare" brojke */
+  font-variant-numeric: lining-nums;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--okvir-razmak) + 1.5rem);
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  padding: calc(var(--okvir-razmak) + var(--okvir-linija));
+  background: var(--krem);
+  font-family: var(--font-tekst);
+  font-weight: 400;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  /* Bez lažnog podebljanja (Playfair samo regular i italic); kurziv u Latu smije se nagnuti. */
+  font-synthesis: style;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+svg,
+iframe {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--zlatna);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--crvena);
+}
+
+:focus-visible {
+  outline: 2px solid var(--zlatna);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-naslovi);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+/* Brojke u naslovnom fontu: uvijek lining (poravnate) */
+h1,
+h2,
+h3,
+h4,
+.playfair {
+  font-variant-numeric: lining-nums proportional-nums;
+  font-feature-settings: 'lnum' 1, 'pnum' 1;
+}
+
+p {
+  margin: 0 0 1em;
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  margin: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.preskoci {
+  position: absolute;
+  top: calc(var(--okvir-razmak) + 0.75rem);
+  left: -999rem;
+  z-index: 60;
+  padding: 0.5rem 1rem;
+  background: var(--crvena);
+  color: var(--krem);
+  font-size: 0.875rem;
+}
+
+.preskoci:focus {
+  left: calc(var(--okvir-razmak) + 0.75rem);
+  color: var(--krem);
+}
+
+/* ─── Zlatni okvir ───────────────────────────────────────────── */
+/* Krem pojas uz rub ekrana i tanka zlatna linija; sadržaj se kreće unutar njega. */
+
+.okvir {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  border: var(--okvir-razmak) solid var(--krem);
+}
+
+.okvir::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: var(--okvir-linija) solid var(--zlatna-55);
+}
+
+.stranica {
+  min-height: calc(100svh - 2 * (var(--okvir-razmak) + var(--okvir-linija)));
+  display: flex;
+  flex-direction: column;
+}
+
+.stranica > main {
+  flex: 1;
+}
+
+/* ─── Tipografski detalji ────────────────────────────────────── */
+
+.nadnaslov {
+  margin: 0;
+  font-family: var(--font-tekst);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--crvena);
+  font-variant-numeric: lining-nums;
+}
+
+.razdjelnik {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  color: var(--zlatna);
+}
+
+.razdjelnik::before,
+.razdjelnik::after {
+  content: '';
+  width: min(4.5rem, 18vw);
+  height: var(--okvir-linija);
+  background: var(--zlatna-55);
+}
+
+.razdjelnik .zvijezda {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Tekst koji je još placeholder, npr. [SASTOJAK] */
+.ph {
+  color: var(--tekst-blagi);
+  text-decoration: underline dotted var(--zlatna);
+  text-underline-offset: 0.25em;
+}
+
+/* Gumb-poveznica (npr. "Natrag na kalendar") */
+.gumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.4rem;
+  border: var(--okvir-linija) solid var(--zlatna);
+  color: var(--crvena);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.gumb:hover {
+  background: var(--crvena);
+  border-color: var(--crvena);
+  color: var(--krem);
+}
+
+.gumb .zvijezda {
+  width: 0.7rem;
+  height: 0.7rem;
+  color: var(--zlatna);
+}
+
+/* ─── Fotografija ili placeholder ────────────────────────────── */
+
+.slika {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slika-placeholder {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  container-type: size;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 42%, var(--krem-svijetla) 0%, var(--krem-tamna) 100%);
+  color: var(--tekst);
+}
+
+.slika-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: clamp(5px, 4.5cqmin, 20px);
+  border: var(--okvir-linija) solid var(--zlatna-55);
+  pointer-events: none;
+}
+
+.slika-placeholder__sadrzaj {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.3rem, 6cqmin, 1.4rem);
+  padding: 0 12cqmin;
+  text-align: center;
+}
+
+.slika-placeholder__zvijezda {
+  width: clamp(12px, 13cqmin, 52px);
+  height: auto;
+  color: var(--zlatna);
+}
+
+.slika-placeholder__naziv {
+  font-family: var(--font-naslovi);
+  font-style: italic;
+  font-size: clamp(0.8rem, 10cqmin, 3rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+/* ─── Način pregleda (?preview=1) ────────────────────────────── */
+
+.pregled-oznaka {
+  display: none;
+}
+
+.pregled .pregled-oznaka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem 1.1rem;
+  padding: 0.55rem var(--rub);
+  border-bottom: var(--okvir-linija) solid var(--zlatna-30);
+  background: var(--krem-svijetla);
+  color: var(--tekst-blagi);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.pregled-oznaka a,
+.pregled-oznaka button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--crvena);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--zlatna);
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.pregled-oznaka a:hover,
+.pregled-oznaka button:hover {
+  color: var(--tekst);
+}
+
+/* ─── Manje pokreta ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

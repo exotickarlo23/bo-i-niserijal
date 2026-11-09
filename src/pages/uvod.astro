@@ -1,0 +1,71 @@
+---
+/**
+ * Najava serijala (/uvod/): tekst o serijalu, video i raspored svih kolača.
+ * Tekst se uređuje u src/content/uvod.md. Zaključana je do svog datuma kao i recepti.
+ */
+import { render } from 'astro:content';
+import UvodSadrzaj from '../components/UvodSadrzaj.astro';
+import Zakljucano from '../components/Zakljucano.astro';
+import Zaglavlje from '../components/Zaglavlje.astro';
+import Osnova from '../layouts/Osnova.astro';
+import { stranica } from '../config';
+import { jeObjavljeno } from '../lib/datumi';
+import { dohvatiEpizode, dohvatiUvod } from '../lib/epizode';
+import { izrez, pronadiSliku } from '../lib/slike';
+import { jePopunjeno } from '../lib/tekst';
+import { pripremiVidee } from '../lib/video';
+
+const uvod = await dohvatiUvod();
+const d = uvod.data;
+const epizode = await dohvatiEpizode();
+const { Content } = await render(uvod);
+
+const videi = pripremiVidee(d.video);
+const slika = pronadiSliku(d.slika || '/slike/uvod.jpg');
+const og = slika ? await izrez(slika, 1200, 630) : null;
+const objavljeno = jeObjavljeno(d.datum);
+const opis = jePopunjeno(d.opis)
+  ? d.opis
+  : `${d.naziv}: o serijalu ${stranica.naziv}, video najava i raspored svih božićnih kolača od 1. do 24. prosinca.`;
+---
+
+<Osnova naslov={d.naziv} opis={opis} slikaOg={og ? { ...og, alt: d.slikaAlt || d.naziv } : null} tip="article" objavljeno={d.datum}>
+  <Zaglavlje slot="zaglavlje" />
+
+  {
+    objavljeno ? (
+      <UvodSadrzaj uvod={uvod} epizode={epizode} videi={videi} imaSliku={slika !== null}>
+        <Content />
+      </UvodSadrzaj>
+    ) : (
+      <>
+        <template id="sadrzaj-predlozak">
+          <UvodSadrzaj uvod={uvod} epizode={epizode} videi={videi} imaSliku={slika !== null}>
+            <Content />
+          </UvodSadrzaj>
+        </template>
+        <script is:inline data-datum={d.datum}>
+          (function (s) {
+            var d = window.dvanaest;
+            if (!d || !d.otkljucano(s.getAttribute('data-datum'))) return;
+            var t = document.getElementById('sadrzaj-predlozak');
+            s.parentNode.insertBefore(t.content.cloneNode(true), s);
+            document.documentElement.classList.add('otkljucano');
+          })(document.currentScript);
+        </script>
+        <Zakljucano datum={d.datum} naslov="Serijal počinje" />
+      </>
+    )
+  }
+
+  <!-- Raspored: označi što je već izašlo, a što stiže -->
+  <script is:inline>
+    (function () {
+      var d = window.dvanaest;
+      if (!d) return;
+      document.querySelectorAll('.raspored__stavka').forEach(function (li) {
+        li.classList.add(d.otkljucano(li.getAttribute('data-datum')) ? 'objavljeno' : 'uskoro');
+      });
+    })();
+  </script>
+</Osnova>

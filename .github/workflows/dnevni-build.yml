@@ -1,0 +1,29 @@
+# Opcionalno: svaki dan u prosincu malo iza ponoći (po zagrebačkom vremenu)
+# pokreće novi deploy na Vercelu, pa recept tog dana postaje dio statičnog HTML-a
+# (bolje za Google). Stranica radi i bez ovoga; upute su u README.md.
+#
+# Uključuje se tako da u GitHub repozitoriju dodaš tajnu VERCEL_DEPLOY_HOOK
+# (Settings → Secrets and variables → Actions). Bez tajne se ništa ne događa.
+
+name: Dnevni build u prosincu
+
+on:
+  schedule:
+    # 23:05 UTC = 00:05 po zagrebačkom (zimskom) vremenu, od 30. 11. do 23. 12.
+    - cron: '5 23 30 11 *'
+    - cron: '5 23 1-23 12 *'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pokreni novi deploy na Vercelu
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "Tajna VERCEL_DEPLOY_HOOK nije postavljena, preskačem."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"
