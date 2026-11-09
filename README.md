@@ -242,6 +242,7 @@ export const sponsor: Sponzor | null = {
   name: 'Ime brenda',
   logo: '/sponzor/logo.svg',
   url: 'https://www.brend.hr',
+  message: 'Jedna do dvije rečenice o suradnji.', // opcionalno
 };
 ```
 
@@ -249,8 +250,8 @@ Logotip spremi u `public/sponzor/` (najbolje SVG ili PNG s prozirnom pozadinom).
 
 Kad je sponzor uključen:
 
-- u zaglavlju piše **12 dana do Božića × [logo]**,
-- na dnu svakog recepta i na stranici najave je blok **Serijal u suradnji s [brend]** s poveznicom,
+- u zaglavlju piše **12 dana do Božića × [logo]** (na početnoj velikim slovima ispod naslova),
+- na početnoj stranici odmah ispod kalendara, na dnu svakog recepta i na najavi je **istaknuti blok „Serijal u suradnji s”**: kartica s dvostrukim zlatnim okvirom, velikim logotipom, porukom iz polja `message` (u kurzivu) i gumbom s adresom brenda,
 - uz sastojke se diskretno prikazuje proizvod iz polja `sponsorProduct`.
 
 Proizvod se upisuje u recept:
@@ -288,7 +289,17 @@ U preview modu:
 
 Bez parametra stranica radi normalno, po datumima.
 
-Napomena: `?preview=1` nije lozinka. Tko dobije takvu poveznicu, vidi sve recepte. Za tajni pitch šalji poveznicu samo onima kojima je namijenjena.
+### Pregled određenog dana: `?datum=`
+
+Da vidiš stranicu točno kakva će biti nekog dana, upiši datum u adresu:
+
+```
+https://tvoja-domena.hr/?datum=2026-12-09
+```
+
+Tada su otvorene samo kućice do 9. prosinca, ostale su zaključane i na klik javljaju „Otvara se …”, a recepti koji još nisu stigli prikazuju „Ovaj kolač stiže …”. Datum se prenosi kroz sve poveznice. Na vrhu piše „Pregled kao da je danas 9. prosinca”, uz **Zatvori vratašca** i **Izađi iz pregleda**. Dobro je za provjeru prije prosinca i za pitch kad brendu želiš pokazati kalendar usred serijala.
+
+Napomena: `?preview=1` i `?datum=` nisu lozinke. Tko dobije takvu poveznicu, vidi recepte prije vremena. Za tajni pitch šalji poveznicu samo onima kojima je namijenjena.
 
 ---
 
@@ -364,4 +375,4 @@ U `src/config.ts` upiši `autor` (tvoje ime ili naziv kanala) i poveznice na dru
 
 **Video se ne prikazuje.** Provjeri da je poveznica cijela (za TikTok mora sadržavati `/video/` i broj).
 
-**Recept se ne otvara iako je datum prošao.** Provjeri `datum` u receptu. Za probu prije datuma koristi `?preview=1`.
+**Recept se ne otvara iako je datum prošao.** Provjeri `datum` u receptu. Za probu prije datuma koristi `?preview=1` ili `?datum=2026-12-09`.

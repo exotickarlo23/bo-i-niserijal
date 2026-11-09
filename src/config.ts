@@ -14,6 +14,8 @@ export interface Sponzor {
   logo: string;
   /** Web adresa brenda (npr. "https://www.brend.hr"). */
   url: string;
+  /** Opcionalno: kratka poruka u istaknutom bloku sponzora (jedna do dvije rečenice). */
+  message?: string;
 }
 
 /**
@@ -27,11 +29,13 @@ export interface Sponzor {
  *     name: 'Ime brenda',
  *     logo: '/sponzor/primjer-logo.svg',
  *     url: 'https://www.primjer.hr',
+ *     message: 'Jedna do dvije rečenice o suradnji (opcionalno).',
  *   };
  *
  * Logotip spremi u public/sponzor/. Kad je sponzor uključen:
  *  · u zaglavlju piše „12 dana do Božića × [logo]”
- *  · na dnu svakog recepta je blok „Serijal u suradnji s [brend]”
+ *  · na početnoj stranici ispod kalendara, na dnu svakog recepta i na najavi
+ *    je istaknuti blok „Serijal u suradnji s” s logotipom, porukom i poveznicom
  *  · uz sastojke se prikazuje proizvod iz polja sponsorProduct (ako je upisan u receptu)
  */
 export const sponsor: Sponzor | null = null;

@@ -1,58 +1,162 @@
 ---
-/** "Serijal u suradnji s [brend]" na dnu recepta. Bez sponzora ne prikazuje ništa. */
+/**
+ * Istaknuti blok "Serijal u suradnji s [brend]": na početnoj stranici ispod
+ * kalendara, na dnu svakog recepta i na najavi. Bez sponzora ne prikazuje ništa.
+ */
 import Zvijezda from './Zvijezda.astro';
 import { sponsor } from '../config';
+
+let domena = '';
+if (sponsor) {
+  try {
+    domena = new URL(sponsor.url).hostname.replace(/^www\./, '');
+  } catch {
+    domena = sponsor.url;
+  }
+}
 ---
 
 {
   sponsor && (
-    <aside class="sponzor-blok" aria-label="Sponzor serijala">
-      <Zvijezda class="sponzor-blok__zvijezda" />
-      <p class="sponzor-blok__tekst">Serijal u suradnji s</p>
-      <a class="sponzor-blok__poveznica" href={sponsor.url} rel="sponsored noopener" target="_blank">
-        <img class="sponzor-blok__logo" src={sponsor.logo} alt={sponsor.name} />
+    <aside class="sponzor" aria-label={`Sponzor serijala: ${sponsor.name}`}>
+      <Zvijezda class="sponzor__vrh" />
+      <span class="sponzor__kut sponzor__kut--gl" aria-hidden="true">
+        <Zvijezda />
+      </span>
+      <span class="sponzor__kut sponzor__kut--gd" aria-hidden="true">
+        <Zvijezda />
+      </span>
+      <span class="sponzor__kut sponzor__kut--dl" aria-hidden="true">
+        <Zvijezda />
+      </span>
+      <span class="sponzor__kut sponzor__kut--dd" aria-hidden="true">
+        <Zvijezda />
+      </span>
+
+      <p class="sponzor__nadnaslov">Serijal u suradnji s</p>
+      <a class="sponzor__logo-poveznica" href={sponsor.url} rel="sponsored noopener" target="_blank" tabindex="-1" aria-hidden="true">
+        <img class="sponzor__logo" src={sponsor.logo} alt="" />
+      </a>
+      <p class="sr-only">{sponsor.name}</p>
+      {sponsor.message && <p class="sponzor__poruka">{sponsor.message}</p>}
+      <a class="gumb sponzor__gumb" href={sponsor.url} rel="sponsored noopener" target="_blank">
+        {domena}
+        <span aria-hidden="true">→</span>
       </a>
     </aside>
   )
 }
 
 <style>
-  .sponzor-blok {
+  .sponzor {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
-    max-width: 22rem;
+    gap: 1.35rem;
+    max-width: 34rem;
     margin: var(--razmak-sekcija) auto 0;
-    padding: 1.75rem 1.5rem;
-    border-block: var(--okvir-linija) solid var(--zlatna-55);
+    margin-inline: max(var(--rub), calc((100% - 34rem) / 2));
+    padding: clamp(2.75rem, 9vw, 3.75rem) clamp(1.5rem, 6vw, 3rem) clamp(2.5rem, 8vw, 3.25rem);
+    border: var(--okvir-linija) solid var(--zlatna-55);
+    background: var(--krem-svijetla);
     text-align: center;
   }
 
-  .sponzor-blok :global(.sponzor-blok__zvijezda) {
-    width: 0.7rem;
-    height: 0.7rem;
+  /* Unutarnja linija: dvostruki zlatni okvir */
+  .sponzor::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: var(--okvir-linija) solid var(--zlatna-30);
+    pointer-events: none;
+  }
+
+  .sponzor :global(.sponzor__vrh) {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1.35rem;
+    height: 1.35rem;
+    padding: 0 0.5rem;
+    box-sizing: content-box;
+    /* gornja polovica u boji stranice, donja u boji kartice: zvjezdica prekida obje linije */
+    background: linear-gradient(var(--krem) 50%, var(--krem-svijetla) 50%);
+    color: var(--zlatna);
+    transform: translate(-50%, -50%);
+  }
+
+  .sponzor__kut {
+    position: absolute;
+    display: block;
+    width: 0.8rem;
+    height: 0.8rem;
     color: var(--zlatna);
   }
 
-  .sponzor-blok__tekst {
+  .sponzor__kut :global(.zvijezda) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .sponzor__kut--gl {
+    top: -0.4rem;
+    left: -0.4rem;
+  }
+
+  .sponzor__kut--gd {
+    top: -0.4rem;
+    right: -0.4rem;
+  }
+
+  .sponzor__kut--dl {
+    bottom: -0.4rem;
+    left: -0.4rem;
+  }
+
+  .sponzor__kut--dd {
+    bottom: -0.4rem;
+    right: -0.4rem;
+  }
+
+  .sponzor__nadnaslov {
     margin: 0;
     font-weight: 700;
     font-size: 0.6875rem;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: var(--tekst-blagi);
+    color: var(--crvena);
   }
 
-  .sponzor-blok__poveznica {
+  .sponzor__logo-poveznica {
     display: block;
-    padding: 0.25rem;
+    padding: 0.25rem 0;
+    transition: opacity 0.2s ease;
   }
 
-  .sponzor-blok__logo {
-    height: 2.25rem;
+  .sponzor__logo-poveznica:hover {
+    opacity: 0.85;
+  }
+
+  .sponzor__logo {
+    height: clamp(3rem, 11vw, 4.5rem);
     width: auto;
-    max-width: 12rem;
+    max-width: min(17rem, 100%);
     object-fit: contain;
+  }
+
+  .sponzor__poruka {
+    max-width: 26rem;
+    margin: 0;
+    font-family: var(--font-naslovi);
+    font-style: italic;
+    font-size: clamp(1.05rem, 3.8vw, 1.25rem);
+    line-height: 1.5;
+    color: var(--tekst);
+    text-wrap: balance;
+  }
+
+  .sponzor__gumb {
+    margin-top: 0.25rem;
   }
 </style>

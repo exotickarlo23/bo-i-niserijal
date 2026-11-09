@@ -1,6 +1,7 @@
 ---
 /** Početna stranica: adventski kalendar. */
 import Kalendar from '../components/Kalendar.astro';
+import SponzorBlok from '../components/SponzorBlok.astro';
 import SponzorZnak from '../components/SponzorZnak.astro';
 import Zvijezda from '../components/Zvijezda.astro';
 import Osnova from '../layouts/Osnova.astro';
@@ -43,6 +44,8 @@ const jsonLd = {
   <div class="kalendar-sekcija">
     <Kalendar epizode={epizode} />
   </div>
+
+  <SponzorBlok />
 
   <button type="button" id="zatvori-vratasca" slot="pregled">Zatvori vratašca</button>
 </Osnova>

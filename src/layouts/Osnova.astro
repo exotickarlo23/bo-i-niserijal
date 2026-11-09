@@ -92,17 +92,23 @@ const jsonUSkripti = (podaci: unknown) => JSON.stringify(podaci).replace(/</g, '
 
     <!--
       Datumi i način pregleda. Mora se izvršiti prije prikaza stranice.
-      Vratašca i recepti otključavaju se u ponoć po zagrebačkom vremenu;
-      ?preview=1 u adresi otključava sve.
+      Vratašca i recepti otključavaju se u ponoć po zagrebačkom vremenu.
+      ?preview=1 u adresi otključava sve, a ?datum=2026-12-09 prikazuje
+      stranicu kakva je tog dana (za provjeru prije prosinca).
     -->
     <script is:inline>
       (function () {
-        var pregled = false;
+        var MJESECI = ['siječnja', 'veljače', 'ožujka', 'travnja', 'svibnja', 'lipnja', 'srpnja', 'kolovoza', 'rujna', 'listopada', 'studenoga', 'prosinca'];
+        var parametri = null;
         try {
-          pregled = new URLSearchParams(location.search).get('preview') === '1';
+          parametri = new URLSearchParams(location.search);
         } catch (e) {}
+        var pregled = !!parametri && parametri.get('preview') === '1';
+        var zadano = parametri ? parametri.get('datum') : null;
+        var simulirano = zadano && /^\d{4}-\d{2}-\d{2}$/.test(zadano) ? zadano : null;
 
         function danas() {
+          if (simulirano) return simulirano;
           try {
             var d = {};
             new Intl.DateTimeFormat('en-GB', {
@@ -123,6 +129,7 @@ const jsonUSkripti = (podaci: unknown) => JSON.stringify(podaci).replace(/</g, '
 
         window.dvanaest = {
           pregled: pregled,
+          simulirano: simulirano,
           danas: danas,
           otkljucano: function (datum) {
             return pregled || datum <= danas();
@@ -131,16 +138,22 @@ const jsonUSkripti = (podaci: unknown) => JSON.stringify(podaci).replace(/</g, '
 
         var html = document.documentElement;
         html.classList.add('js');
-        if (!pregled) return;
+        if (!pregled && !simulirano) return;
         html.classList.add('pregled');
+        if (!pregled) html.classList.add('pregled-datum');
 
-        // U načinu pregleda sve unutarnje poveznice zadržavaju ?preview=1.
+        // U pregledu sve unutarnje poveznice zadržavaju ?preview=1 odnosno ?datum=...
         document.addEventListener('DOMContentLoaded', function () {
           document.querySelectorAll('a[href^="/"]:not([data-bez-pregleda])').forEach(function (a) {
             var u = new URL(a.getAttribute('href'), location.origin);
-            u.searchParams.set('preview', '1');
+            if (pregled) u.searchParams.set('preview', '1');
+            if (simulirano) u.searchParams.set('datum', simulirano);
             a.setAttribute('href', u.pathname + u.search + u.hash);
           });
+          var oznaka = document.querySelector('[data-simulirani-datum]');
+          if (oznaka && simulirano) {
+            oznaka.textContent = Number(simulirano.slice(8, 10)) + '. ' + MJESECI[Number(simulirano.slice(5, 7)) - 1];
+          }
         });
       })();
     </script>
@@ -151,9 +164,10 @@ const jsonUSkripti = (podaci: unknown) => JSON.stringify(podaci).replace(/</g, '
     <div class="okvir" aria-hidden="true"></div>
 
     <div class="stranica">
-      <!-- Vidljivo samo uz ?preview=1 -->
+      <!-- Vidljivo samo uz ?preview=1 ili ?datum=... -->
       <div class="pregled-oznaka">
-        <span>Pregled: sve je otključano</span>
+        <span class="pregled-oznaka__sve">Pregled: sve je otključano</span>
+        <span class="pregled-oznaka__datum">Pregled kao da je danas <strong data-simulirani-datum></strong></span>
         <slot name="pregled" />
         <a href={Astro.url.pathname} data-bez-pregleda>Izađi iz pregleda</a>
       </div>

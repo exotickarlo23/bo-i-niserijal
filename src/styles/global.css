@@ -374,6 +374,20 @@ ol {
   text-align: center;
 }
 
+.pregled-oznaka__datum,
+.pregled-datum .pregled-oznaka__sve {
+  display: none;
+}
+
+.pregled-datum .pregled-oznaka__datum {
+  display: inline;
+}
+
+.pregled-oznaka strong {
+  color: var(--tekst);
+  font-weight: 700;
+}
+
 .pregled-oznaka a,
 .pregled-oznaka button {
   padding: 0;

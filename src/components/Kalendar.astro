@@ -92,7 +92,8 @@ const { epizode } = Astro.props;
     var d = window.dvanaest;
     if (!d) return;
 
-    var KLJUC = d.pregled ? '12-dana:otvorena-pregled' : '12-dana:otvorena';
+    // Pregledi (?preview=1, ?datum=...) pamte otvorena vratašca odvojeno od pravog kalendara.
+    var KLJUC = d.pregled || d.simulirano ? '12-dana:otvorena-pregled' : '12-dana:otvorena';
     var obavijest = document.getElementById('kalendar-obavijest');
     var smanjeniPokret = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
